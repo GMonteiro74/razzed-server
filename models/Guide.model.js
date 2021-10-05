@@ -4,22 +4,22 @@ const guideSchema = new Schema({
     
         firstName: String,
         lastName: String,
-        // password: String,
         startedWorking: Number,
         email: {
             type: String,
-            unique: true,
+            unique: false,
         },
         location: String,
         languages: {
-            type: String,
-            enum: ['EN', 'PT', 'ES', 'IT', 'ZH', 'JA', 'RU', 'FR', 'NL', 'DE']
+            type: Array,
         },
         bio: String,
         imageUrl: String,
         password: String,
+        type: String,
+        tours: Array,
 }, {
-    timestamps: true
+    timestamps: true,
 });
 
 const Guide = new model('Guide', guideSchema);

@@ -2,8 +2,9 @@ const router = require("express").Router();
 const fileUpload = require('../config/cloudinary');
 
 router.get("/", (req, res, next) => {
+  
   res.render("index");
-});
+  });
 
 router.post('/upload', fileUpload.single('file'), (req, res) => {
   try {

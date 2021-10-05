@@ -9,11 +9,12 @@ const agencySchema = new Schema({
       type: String,
       unique: true,
     },
-    // password: String,
     location: String,
     established: Number,
-    imgUrl: String,
+    imageUrl: String,
     password: String,
+    type: String,
+    tours: Array,
 }, {
   timestamps: true
 })

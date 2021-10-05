@@ -4,13 +4,13 @@ const Guide = require('../models/Guide.model');
 const bcrypt = require("bcryptjs");
 
 router.post('/agencies/signup', async (req, res) => {
-    const { name, email, location, established, imgUrl, password } = req.body;
-    if ( !name || !email || !location || !established || !imgUrl || !password ) {
+    const { name, email, location, established, imageUrl, password, type } = req.body;
+    if ( !name || !email || !location || !established || !imageUrl || !password ) {
         res.status(400).json({ message: "missing fields"});
         return;
 }
     const userEmail = await Agency.findOne({ email });
-    if (userEmail !== null) { //found the user, it already exists
+    if (userEmail !== null) { 
     res.status(400).json({ message: 'Email already exists' });
     return;
 }
@@ -19,7 +19,7 @@ router.post('/agencies/signup', async (req, res) => {
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
-        const response = await Agency.create({ name, email, location, established, imgUrl, password: hashedPassword });
+        const response = await Agency.create({ name, email, location, established, imageUrl, password: hashedPassword, type });
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({message: error.message})
@@ -27,13 +27,13 @@ router.post('/agencies/signup', async (req, res) => {
 })
 
 router.post('/tour-guides/signup', async (req, res) => {
-    const { firstName, lastName, startedWorking, email, location, languages, bio, imageUrl, password } = req.body;
+    const { firstName, lastName, startedWorking, email, location, languages, bio, imageUrl, password, type } = req.body;
     if (!firstName || !lastName || !startedWorking || !email || !location || !languages || !bio || !imageUrl || !password) {
         res.status(400).json({ message: "missing fields"});
         return;
     }
     const userEmail = await Guide.findOne({ email });
-    if (userEmail !== null) { //found the user, it already exists
+    if (userEmail !== null) { 
     res.status(400).json({ message: 'Email already exists' });
     return;
 }
@@ -41,7 +41,7 @@ router.post('/tour-guides/signup', async (req, res) => {
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
-        const response = await Guide.create({ firstName, lastName, startedWorking, email, location, languages, bio, imageUrl, password:hashedPassword });
+        const response = await Guide.create({ firstName, lastName, startedWorking, email, location, languages, bio, imageUrl, password:hashedPassword, type });
         res.status(200).json(response);
         
     } catch (error) {
@@ -74,6 +74,7 @@ if (bcrypt.compareSync(password, guide.password)) {
 
 router.post("/agencies/login", async (req, res) => {
     const { email, password } = req.body;
+    
 
     if (email === "" || password === "") {
         res.status(400),json({message: 'missing fields'})
@@ -89,13 +90,13 @@ router.post("/agencies/login", async (req, res) => {
 if (bcrypt.compareSync(password, agency.password)) {
     //passwords match - login successfull
     req.session.currentUser = agency;
+    console.log(req.session);
     res.status(200).json(agency);
 } else {
     res.status(401).json({message: 'invalid login'});
 }
 });
 
-// só é preciso botão para fazer logout
 router.post("/logout", (req, res) => {
     req.session.destroy();
     res.status(200).json({ message: 'user logged out' })

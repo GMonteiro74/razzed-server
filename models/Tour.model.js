@@ -3,12 +3,10 @@ const { Schema, model } = require("mongoose");
 const tourSchema = new Schema({
     type: {
         type: String,
-        enum: ['HD', 'FD', 'Circuit'],
         required: true,
     },
     language: {
         type: String,
-        enum: ['EN', 'PT', 'ES', 'IT', 'ZH', 'JA', 'RU', 'FR', 'NL', 'DE'],
         required: true,
     },
     rate: Number,
@@ -29,11 +27,14 @@ const tourSchema = new Schema({
         type: Date,
         required: true,
     },
-    
-    // agency: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'Agency'
-    // }
+    agency: {
+        type: Schema.Types.ObjectId,
+        ref: 'Agency'
+    },
+    guide: {
+        type: Schema.Types.ObjectId,
+        ref: 'Guide'
+    }
 }, {
     timestamps: true,
 })
