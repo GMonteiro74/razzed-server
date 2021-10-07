@@ -27,6 +27,7 @@ app.use(
       sameSite: 'none',// sameSite: true, //both fe and be are running on the same hostname
       httpOnly: false, 
       maxAge: 60000, 
+      secure: true,
     },
     rolling: true,
   })
