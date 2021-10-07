@@ -19,6 +19,7 @@ const tourSchema = new Schema({
         required: true,
     },
     available: Boolean,
+    reply: Object,
     startDate: {
         type: Date,
         required: true,

@@ -15,6 +15,7 @@ const agencySchema = new Schema({
     password: String,
     type: String,
     tours: Array,
+    notifications: Array,
 }, {
   timestamps: true
 })

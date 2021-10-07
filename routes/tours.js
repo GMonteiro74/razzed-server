@@ -1,10 +1,11 @@
-const router = require('express').Router();
-const { response } = require('express'); 
+const router = require('express').Router()
+const Agency = require('../models/Agency.model');
+const Guide = require('../models/Guide.model');
 const Tour = require('../models/Tour.model');
 
 router.get('/tours', async (req, res) => {
     try {
-        const tours = await Tour.find({ sort: {createdAt: -1} });
+        const tours = await Tour.find({ sort: {createdAt: 1} }).populate('agency');
         res.status(200).json(tours);
      } catch (error) {
          res.status(500).json({ message: error.message });
@@ -27,9 +28,11 @@ router.post('/tours', async (req, res) => {
             pax, 
             description, 
             available: true, 
+            reply: false,
             startDate, 
             finalDate, 
             agency:req.session.currentUser })
+            
         res.status(200).json(response);
         } else {
             res.status(401).json({ message: 'Unauthorized'})
@@ -49,6 +52,15 @@ router.get('/my-tours', async (req, res) => {
     }    
 }
 )
+
+router.put('/my-tours/:tourID/reject', async (req, res) => {
+    try {
+        await Tour.findByIdAndUpdate(req.params.tourID, { reply: {sender: null}});
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }    
+})
 
 router.get('/my-tours/:id', async (req, res) => {
     console.log(req.session.currentUser);
@@ -85,6 +97,33 @@ router.put('/my-tours/:id', async (req, res) => {
     }
 })
 
+router.put('/my-tours/:id/reply', async (req, res) => {
+    
+    const { sender } = req.body;
+    try {
+       
+        const response = await Tour.findByIdAndUpdate(req.params.id, { reply: { sender }});        
+        console.log(response.reply);
+        res.status(200).json(`Reply of ${req.params.id} updated`);
+        
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+router.put('/my-tours/:id/:guideID', async (req, res) => {
+    
+    try {       
+        const response = await Tour.findByIdAndUpdate(req.params.id, { guide: req.params.guideID, available: false });        
+        console.log(response.guide);
+        res.status(200).json(`Guide of ${req.params.id} updated`);
+         
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+
 router.delete('/my-tours/:id', async (req, res) => {
     try {
         await Tour.findByIdAndRemove(req.params.id);
@@ -97,6 +136,8 @@ router.delete('/my-tours/:id', async (req, res) => {
          res.status(500).json({ message: error.message });
      }    
 })
+
+
 
 
 module.exports = router;

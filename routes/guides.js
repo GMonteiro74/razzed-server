@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const Guide = require('../models/Guide.model');
 const fileUpload = require('../config/cloudinary');
+const Tour = require('../models/Tour.model');
 
 
 router.get('/tour-guides', async (req, res) => {
@@ -15,7 +16,7 @@ router.get('/tour-guides', async (req, res) => {
 router.get('/tour-guides/:id', async (req, res) => {
     try {
         const response = await Guide.findById(req.params.id);
-        if (req.session.currentUser.email === response.email) {
+        if (req.session.currentUser.email === response.email || req.session.currentUser.type === 'agency') {
         res.status(200).json(response);
         } else {
             res.status(401).json({message: 'Unauthorized'})
@@ -40,6 +41,33 @@ router.put('/tour-guides/:id', async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 })
+
+router.get('/tour-guides/my-tours', async (req, res) => {
+    console.log(req.session.currentUser);
+    try {
+        const response = await Tour.find({ sort: {createdAt: -1}, guide: req.session.currentUser});
+        console.log(response);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }    
+}
+)
+
+router.put('/tour-guides/:id/notification/:tourID', async (req, res) => {
+    const { message } = req.body;
+    try {
+        const response = await Guide.findByIdAndUpdate(req.params.id, {
+            $push: { notifications: { "sender": req.session.currentUser,
+                "message":message }, tours: req.params.tourID}
+        })
+        console.log(response);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+
 
 router.delete("/tour-guides/:id", async (req, res) => {
     try {
