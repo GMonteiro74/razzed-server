@@ -5,7 +5,7 @@ const Tour = require('../models/Tour.model');
 
 router.get('/tours', async (req, res) => {
     try {
-        const tours = await Tour.find({ sort: {createdAt: 1} }).populate('agency');
+        const tours = await Tour.find({ sort: {createdAt: 1}, available: true }).populate('agency'); 
         res.status(200).json(tours);
      } catch (error) {
          res.status(500).json({ message: error.message });
@@ -32,7 +32,8 @@ router.post('/tours', async (req, res) => {
             startDate, 
             finalDate, 
             agency:req.session.currentUser })
-            
+
+        await Agency.findByIdAndUpdate(req.session.currentUser._id, { $push: { tours: req.body}})
         res.status(200).json(response);
         } else {
             res.status(401).json({ message: 'Unauthorized'})
@@ -44,7 +45,7 @@ router.post('/tours', async (req, res) => {
 
 router.get('/my-tours', async (req, res) => {
     try {
-        const response = await Tour.find({ sort: {createdAt: -1}, agency: req.session.currentUser});
+        const response = await Tour.find({ sort: {createdAt: -1}, agency: req.session.currentUser}).populate('guide');
         console.log(response);
         res.status(200).json(response);
     } catch (error) {
@@ -53,9 +54,10 @@ router.get('/my-tours', async (req, res) => {
 }
 )
 
-router.put('/my-tours/:tourID/reject', async (req, res) => {
+router.put('/my-tours/:tourID/remove-reply', async (req, res) => {
     try {
-        await Tour.findByIdAndUpdate(req.params.tourID, { reply: {sender: null}});
+        const response = await Tour.findByIdAndUpdate(req.params.tourID, { reply: {sender: null}});
+        console.log(response);
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -126,12 +128,8 @@ router.put('/my-tours/:id/:guideID', async (req, res) => {
 
 router.delete('/my-tours/:id', async (req, res) => {
     try {
-        await Tour.findByIdAndRemove(req.params.id);
-        if (req.session.currentUser === response.agency) {
+        await Tour.findByIdAndRemove(req.params.id);        
         res.status(200).json({message: `Tour ${req.params.id} was removed`});
-        } else {
-            res.status(401);
-        }
      } catch (error) {
          res.status(500).json({ message: error.message });
      }    

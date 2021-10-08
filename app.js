@@ -32,7 +32,6 @@ app.use(
     rolling: true,
   })
 );
-
 // default value for title local
 const projectName = "Razzed";
 const capitalized = (string) => string[0].toUpperCase() + string.slice(1).toLowerCase();

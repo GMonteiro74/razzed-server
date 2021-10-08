@@ -3,7 +3,6 @@ const Guide = require('../models/Guide.model');
 const fileUpload = require('../config/cloudinary');
 const Tour = require('../models/Tour.model');
 
-
 router.get('/tour-guides', async (req, res) => {
     try {
        const guides = await Guide.find();
@@ -12,6 +11,18 @@ router.get('/tour-guides', async (req, res) => {
         res.status(500).json({ message: error.message });
     }    
 });
+
+router.get('/tour-guides/my-tours', async (req, res) => {
+    console.log(req.session.currentUser);
+    try {
+        const response = await Tour.find( { guide: req.session.currentUser } );
+        console.log(response);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }    
+}
+)
 
 router.get('/tour-guides/:id', async (req, res) => {
     try {
@@ -42,17 +53,17 @@ router.put('/tour-guides/:id', async (req, res) => {
     }
 })
 
-router.get('/tour-guides/my-tours', async (req, res) => {
-    console.log(req.session.currentUser);
+router.put('/tour-guides/:id/notification/delete', async (req, res) => {
     try {
-        const response = await Tour.find({ sort: {createdAt: -1}, guide: req.session.currentUser});
+        const response = await Guide.findByIdAndUpdate(req.params.id, {
+            $pull: { notifications: { "sender": req.params.senderID}}
+        })
         console.log(response);
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ message: error.message });
-    }    
-}
-)
+    }
+})
 
 router.put('/tour-guides/:id/notification/:tourID', async (req, res) => {
     const { message } = req.body;
@@ -60,6 +71,19 @@ router.put('/tour-guides/:id/notification/:tourID', async (req, res) => {
         const response = await Guide.findByIdAndUpdate(req.params.id, {
             $push: { notifications: { "sender": req.session.currentUser,
                 "message":message }, tours: req.params.tourID}
+        })
+        console.log(response);
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+
+router.put('/tour-guides/:id/:tourID', async (req, res) => {
+
+    try {
+        const response = await Guide.findByIdAndUpdate(req.params.id, {
+            $pull: { tours: req.params.tourID}
         })
         console.log(response);
         res.status(200).json(response);
